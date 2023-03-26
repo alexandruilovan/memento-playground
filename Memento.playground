@@ -1,0 +1,84 @@
+protocol GameSave {
+    var player: Player { get }
+    var enemies: [Enemy] { get }
+}
+
+class ConcreteGameSave: GameSave {
+    var player: Player
+    var enemies: [Enemy]
+    
+    init(player: Player, enemies: [Enemy]) {
+        self.player = player
+        self.enemies = enemies
+    }
+}
+
+class Player {
+    var name: String
+    var level: Int
+    var health: Int
+    var experience: Int
+    var inventory: [String]
+    
+    init(name: String, level: Int, health: Int, experience: Int, inventory: [String]) {
+        self.name = name
+        self.level = level
+        self.health = health
+        self.experience = experience
+        self.inventory = inventory
+    }
+    
+    func createGameSave() -> GameSave {
+        return ConcreteGameSave(player: self, enemies: Game.shared.enemies)
+    }
+    
+    func setGameSave(_ gameSave: GameSave) {
+        self.name = gameSave.player.name
+        self.level = gameSave.player.level
+        self.health = gameSave.player.health
+        self.experience = gameSave.player.experience
+        self.inventory = gameSave.player.inventory
+        Game.shared.enemies = gameSave.enemies
+    }
+}
+
+class Enemy {
+    var name: String
+    var level: Int
+    var health: Int
+    
+    init(name: String, level: Int, health: Int) {
+        self.name = name
+        self.level = level
+        self.health = health
+    }
+}
+
+class Game {
+    static let shared = Game()
+    var enemies: [Enemy] = []
+    var player = Player(name: "Player1", level: 1, health: 100, experience: 0, inventory: [])
+    
+    private init() {}
+    
+    func save() -> GameSave {
+        return player.createGameSave()
+    }
+    
+    func load(_ gameSave: GameSave) {
+        player.setGameSave(gameSave)
+    }
+}
+
+let game = Game.shared
+game.enemies.append(Enemy(name: "Goblin", level: 1, health: 50))
+game.enemies.append(Enemy(name: "Skeleton", level: 2, health: 60))
+game.player.level = 2
+game.player.health = 80
+game.player.experience = 100
+game.player.inventory.append("Sword")
+game.enemies[0].health = 30
+
+let gameSave = game.save()
+game.load(gameSave)
+
